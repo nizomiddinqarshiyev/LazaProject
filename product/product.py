@@ -6,9 +6,12 @@ from typing import List
 import aiofiles
 from starlette.responses import FileResponse
 
+from models.models import Product
+
 product_root = APIRouter()
 
 
 @product_root.get('/product')
 async def get_all_products(session: AsyncSession = Depends(get_async_session)):
-    query = select()
+    query = select(Product)
+
