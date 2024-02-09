@@ -230,11 +230,11 @@ class Review(Base):
 
 
 class Image(Base):
-    __tablename__ = 'image_review'
+    __tablename__ = 'image'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
-    review_id = Column(Integer, ForeignKey('review.id'))
+    product = Column(Integer, ForeignKey('product.id'))
 
 
 class ShoppingCart(Base):
