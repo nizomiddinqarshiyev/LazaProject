@@ -3,6 +3,7 @@ from sqlalchemy import (
     Text, TIMESTAMP, DECIMAL, UniqueConstraint,
     Enum, MetaData, Boolean
 )
+from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 import enum
@@ -20,18 +21,12 @@ class User(Base):
     lastname = Column(String(30))
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
-    phone = Column(Integer)
+    phone = Column(String(20))
     address = Column(Integer, ForeignKey('address.id'))
     image = Column(String)
     is_verified = Column(Boolean)
     registration_at = Column(TIMESTAMP, default=datetime.utcnow)
     birth_date = Column(TIMESTAMP, nullable=True)
-
-
-class CategoryEnum(enum.Enum):
-    men = 'Men'
-    women = 'Women'
-    kids = 'Kids'
 
 
 class Category(Base):
@@ -103,7 +98,6 @@ class Product(Base):
     description = Column(Text)
     category_id = Column(Integer, ForeignKey('category.id'))
     subcategory_id = Column(Integer, ForeignKey('subcategory.id'))
-    category = Column(Enum(CategoryEnum))
 
 
 class Discount(Base):
@@ -230,7 +224,7 @@ class Review(Base):
 
 
 class Image(Base):
-    __tablename__ = 'image'
+    __tablename__ = 'images'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)

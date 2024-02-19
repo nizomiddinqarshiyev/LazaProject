@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="laza_db@localhost" uuid="ee12322b-98d5-40b0-ba69-e93435f46a4f">
+    <data-source source="LOCAL" name="p15laza@localhost" uuid="3e1aaa1a-a71f-4c98-b737-c63bae33067c">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/laza_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/p15laza</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
