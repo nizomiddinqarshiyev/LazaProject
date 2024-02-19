@@ -3,13 +3,12 @@ from datetime import datetime
 from email.message import EmailMessage
 from .scheme import *
 from database import get_async_session
-import requests
-import jwt
+# import jwt
 
 from sqlalchemy import select, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import NoResultFound
-from fastapi import Depends, APIRouter, HTTPException, FastAPI
+from fastapi import Depends, APIRouter, HTTPException, FastAPI, requests
 from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 from passlib.context import CryptContext

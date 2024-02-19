@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from auth.auth import register_router
 from product.product import product_root
 
 app = FastAPI()
@@ -17,3 +18,4 @@ async def say_hello(name: str):
 
 
 app.include_router(product_root)
+app.include_router(register_router, prefix='auth')
