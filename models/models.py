@@ -13,18 +13,22 @@ Base = declarative_base()
 metadata = MetaData()
 
 
-class User(Base):
-    __tablename__ = 'user'
+class UserData(Base):
+    __tablename__ = 'user_data'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
-    firstname = Column(String(30))
-    lastname = Column(String(30))
+    first_name = Column(String(30))
+    last_name = Column(String(30))
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
     phone = Column(String(20))
     address = Column(Integer, ForeignKey('address.id'))
+
+    password = Column(String)
+    phone = Column(String, default=None)
+    # address = Column(Integer, ForeignKey('address.id'), nullable=True)
     image = Column(String)
-    is_verified = Column(Boolean)
+    is_verified = Column(Boolean, default=False)
     registration_at = Column(TIMESTAMP, default=datetime.utcnow)
     birth_date = Column(TIMESTAMP, nullable=True)
 
