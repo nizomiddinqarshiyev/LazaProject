@@ -3,6 +3,7 @@ from sqlalchemy import (
     Text, TIMESTAMP, DECIMAL, UniqueConstraint,
     Enum, MetaData, Boolean
 )
+from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 import enum
@@ -20,6 +21,9 @@ class UserData(Base):
     last_name = Column(String(30))
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
+    phone = Column(String(20))
+    address = Column(Integer, ForeignKey('address.id'))
+
     password = Column(String)
     phone = Column(String, default=None)
     # address = Column(Integer, ForeignKey('address.id'), nullable=True)
@@ -27,12 +31,6 @@ class UserData(Base):
     is_verified = Column(Boolean, default=False)
     registration_at = Column(TIMESTAMP, default=datetime.utcnow)
     birth_date = Column(TIMESTAMP, nullable=True)
-
-
-class CategoryEnum(enum.Enum):
-    men = 'Men'
-    women = 'Women'
-    kids = 'Kids'
 
 
 class Category(Base):
@@ -104,7 +102,6 @@ class Product(Base):
     description = Column(Text)
     category_id = Column(Integer, ForeignKey('category.id'))
     subcategory_id = Column(Integer, ForeignKey('subcategory.id'))
-    category = Column(Enum(CategoryEnum))
 
 
 class Discount(Base):
@@ -121,7 +118,7 @@ class Discount(Base):
 class ProductDiscount(Base):
     __tablename__ = 'product_discount'
     metadata = metadata
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Add this line
     product_id = Column(Integer, ForeignKey('product.id'))
     discount_id = Column(Integer, ForeignKey('discount.id'))
 
@@ -231,7 +228,7 @@ class Review(Base):
 
 
 class Image(Base):
-    __tablename__ = 'image'
+    __tablename__ = 'images'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
@@ -295,4 +292,3 @@ class UserRole(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     role_id = Column(Integer, ForeignKey('role.id'))
     chat_id = Column(Integer)
-
