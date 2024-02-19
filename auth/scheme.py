@@ -2,7 +2,7 @@ from datetime import datetime, date
 from pydantic import BaseModel
 
 
-class User(BaseModel):
+class UserData(BaseModel):
     first_name: str
     last_name: str
     username: str
@@ -13,7 +13,8 @@ class User(BaseModel):
     image: str
     birth_date: date
 
-class User_in_db(BaseModel):
+
+class UserInDb(BaseModel):
     first_name: str
     last_name: str
     username: str
@@ -23,17 +24,20 @@ class User_in_db(BaseModel):
     image: str
     birth_date: datetime
 
-class User_Info(BaseModel):
+
+class UserInfo(BaseModel):
     first_name: str
     last_name: str
     username: str
     phone: str
     birth_date: datetime
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
     email: str
+
 
 class ForgetPasswordRequest(BaseModel):
     email: str

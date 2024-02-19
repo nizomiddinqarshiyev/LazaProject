@@ -15,6 +15,7 @@ from product.schemes import get_product_list, add_product, get_category, add_cat
 
 product_root = APIRouter()
 
+
 @product_root.get('/product', response_model=List[get_product_list])
 async def get_all_products(session: AsyncSession = Depends(get_async_session)):
     query = select(Product)

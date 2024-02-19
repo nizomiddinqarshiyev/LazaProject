@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, ForeignKey, Integer, String,
     Text, TIMESTAMP, DECIMAL, UniqueConstraint,
-    Enum, MetaData, Boolean
+    Enum, MetaData, Boolean, Float
 )
 from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy.orm import relationship
@@ -13,21 +13,45 @@ Base = declarative_base()
 metadata = MetaData()
 
 
-class UserData(Base):
-    __tablename__ = 'user_data'
+class Country(Base):
+    __tablename__ = 'country'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    code = Column(String)
+
+
+class City(Base):
+    __tablename__ = 'city'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    country = Column(Integer, ForeignKey('country.id'))
+
+
+class Address(Base):
+    __tablename__ = 'address'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    longitude = Column(Float)
+    latitude = Column(Float)
+    city_id = Column(Integer, ForeignKey('city.id'))
+    country_id = Column(Integer, ForeignKey('country.id'))
+
+
+class User(Base):
+    __tablename__ = 'user'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     first_name = Column(String(30))
     last_name = Column(String(30))
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
-    phone = Column(String(20))
-    address = Column(Integer, ForeignKey('address.id'))
-
+    phone = Column(String(20), unique=True, nullable=True)
+    address = Column(Integer, ForeignKey('address.id'), nullable=True)
     password = Column(String)
-    phone = Column(String, default=None)
-    # address = Column(Integer, ForeignKey('address.id'), nullable=True)
-    image = Column(String)
+    image = Column(String, nullable=True)
     is_verified = Column(Boolean, default=False)
     registration_at = Column(TIMESTAMP, default=datetime.utcnow)
     birth_date = Column(TIMESTAMP, nullable=True)
@@ -55,6 +79,21 @@ class Brand(Base):
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
+
+
+class Product(Base):
+    __tablename__ = 'product'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    brand_id = Column(Integer, ForeignKey('brand.id'))
+    name = Column(String)
+    price = Column(DECIMAL(precision=10, scale=2))
+    quantity = Column(Integer)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    sold_quantity = Column(Integer, default=0)
+    description = Column(Text)
+    category_id = Column(Integer, ForeignKey('category.id'))
+    subcategory_id = Column(Integer, ForeignKey('subcategory.id'))
 
 
 class Color(Base):
@@ -87,21 +126,6 @@ class ProductSize(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey('product.id'))
     size_id = Column(Integer, ForeignKey('size.id'))
-
-
-class Product(Base):
-    __tablename__ = 'product'
-    metadata = metadata
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    brand_id = Column(Integer, ForeignKey('brand.id'))
-    name = Column(String)
-    price = Column(DECIMAL(precision=10, scale=2))
-    quantity = Column(Integer)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    sold_quantity = Column(Integer, default=0)
-    description = Column(Text)
-    category_id = Column(Integer, ForeignKey('category.id'))
-    subcategory_id = Column(Integer, ForeignKey('subcategory.id'))
 
 
 class Discount(Base):
@@ -171,30 +195,8 @@ class ShippingAddress(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     shipping_address = Column(Text)
-
-
-class City(Base):
-    __tablename__ = 'city'
-    metadata = metadata
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
-    country = Column(Integer, ForeignKey('country.id'))
-
-
-class Country(Base):
-    __tablename__ = 'country'
-    metadata = metadata
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
-    code = Column(String)
-
-
-class Address(Base):
-    __tablename__ = 'address'
-    metadata = metadata
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    city_id = Column(Integer, ForeignKey('city.id'))
-    country_id = Column(Integer, ForeignKey('country.id'))
+    longitude = Column(Float)
+    latitude = Column(Float)
 
 
 class DeliveryMethod(Base):
@@ -214,6 +216,7 @@ class UserCard(Base):
     card_expiration = Column(String)
     cvc = Column(Integer)
     user_id = Column(Integer, ForeignKey('user.id'))
+    UniqueConstraint('card_number', 'user_id')
 
 
 class Review(Base):
@@ -243,7 +246,6 @@ class ShoppingCart(Base):
     product_id = Column(Integer, ForeignKey('product.id'))
     count = Column(Integer, default=1)
     added_at = Column(TIMESTAMP, default=datetime.utcnow)
-    UniqueConstraint('user_id', 'product_id', name='uniqueSC')
 
 
 class BankCard(Base):
@@ -255,6 +257,7 @@ class BankCard(Base):
     card_cvc = Column(String(length=3), nullable=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     token = Column(String, nullable=True)
+    UniqueConstraint(card_number)
 
 
 class PromoCode(Base):
@@ -267,6 +270,7 @@ class PromoCode(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     end_at = Column(TIMESTAMP)
     start_at = Column(TIMESTAMP)
+    UniqueConstraint('promo_code')
 
 
 class UsedPromoCode(Base):
@@ -276,6 +280,7 @@ class UsedPromoCode(Base):
     promo_code_id = Column(Integer, ForeignKey('promo_code.id'))
     user_id = Column(Integer, ForeignKey('user.id'))
     used_at = Column(TIMESTAMP, default=datetime.utcnow)
+    UniqueConstraint('promo_code_id', 'user_id')
 
 
 class Role(Base):
