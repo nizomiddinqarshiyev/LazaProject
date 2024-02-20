@@ -49,6 +49,7 @@ class User(Base):
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
     address = Column(Integer, ForeignKey('address.id'))
+    phone = Column(String(20), unique=True, nullable=True)
     password = Column(String)
     image = Column(String, nullable=True)
     is_verified = Column(Boolean, default=False)
