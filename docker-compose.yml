@@ -1,0 +1,33 @@
+version: "3.11"
+
+services:
+
+  fastapi:
+    build: .
+    container_name: laza_project
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000 --proxy-headers
+    volumes:
+      - .:/app
+      - media_volume:/uploads
+    env_file:
+      - ../LazaFastApiProject/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    container_name: laza_project_database
+    image: postgres:15.0-alpine
+    env_file:
+      - ../LazaFastApiProject/.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+
+
+volumes:
+  media_volume:
+

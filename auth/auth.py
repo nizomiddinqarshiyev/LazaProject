@@ -1,3 +1,4 @@
+import jwt
 import starlette.status as status
 from datetime import datetime
 from email.message import EmailMessage
@@ -13,13 +14,11 @@ from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 import os
-
-from utils import verify_token, generate_token, send_mail
-from models.models import UserData
+from .utils import verify_token, generate_token, send_mail
+from models.models import User
 
 load_dotenv()
 register_router = APIRouter()
-app = FastAPI(title='User', version='1.0.0')
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
@@ -30,38 +29,36 @@ GOOGLE_REDIRECT_URL = os.getenv('GOOGLE_REDIRECT_URL')
 
 
 @register_router.post('/register')
-async def register(user: User, session: AsyncSession = Depends(get_async_session)):
+async def register(user: UserData, session: AsyncSession = Depends(get_async_session)):
     if user.password1 != user.password2:
         raise HTTPException(status_code=400, detail="Passwords do not match")
 
     try:
-        q_username = select(UserData).where(UserData.username == user.username)
+        q_username = select(User).where(User.username == user.username)
         existing_username = await session.execute(q_username)
         if existing_username.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Username already exists")
 
-        q_email = select(UserData).where(UserData.email == user.email)
+        q_email = select(User).where(User.email == user.email)
         existing_email = await session.execute(q_email)
         if existing_email.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Email already exists")
 
         password = pwd_context.hash(user.password1)
-        user_in_db = User_in_db(**dict(user), password=password, joined_at=datetime.utcnow(), is_verified=True)
-        query = insert(UserData).values(**dict(user_in_db))
+        user_in_db = UserInDb(**dict(user), password=password, joined_at=datetime.utcnow(), is_verified=True)
+        query = insert(User).values(**dict(user_in_db))
         await session.execute(query)
         await session.commit()
-        user_info = User_Info(**dict(user_in_db))
+        user_info = UserInfo(**dict(user_in_db))
         return dict(user_info)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
 @register_router.post('/login')
 async def login(user: UserLogin, session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(UserData).where(UserData.username == user.username)
+        query = select(User).where(User.username == user.username)
         userdata = await session.execute(query)
         user_data = userdata.one()
 
@@ -76,18 +73,18 @@ async def login(user: UserLogin, session: AsyncSession = Depends(get_async_sessi
         return {'success': False, 'message': 'Login failed'}
 
 
-@register_router.get('/user-info', response_model=User_Info)
+@register_router.get('/user-info', response_model=UserInfo)
 async def user_info(token: dict = Depends(verify_token), session: AsyncSession = Depends(get_async_session)):
     if token is None:
         raise HTTPException(status_code=401, detail='Token not provided!')
 
     user_id = token.get('user_id')
 
-    query = select(UserData).where(UserData.id == user_id)
+    query = select(User).where(User.id == user_id)
     user = await session.execute(query)
     try:
         result = user.one()
-        user_info = User_Info(
+        user_info = UserInfo(
             first_name=result[0].first_name,
             last_name=result[0].last_name,
             username=result[0].username,
@@ -134,16 +131,16 @@ async def auth_google(code: str, session: AsyncSession = Depends(get_async_sessi
     username = user_data['username']
     email = user_data['email']
 
-    user_exist_query = select(UserData).where(UserData.username == user_info.json().get('email'))
+    user_exist_query = select(User).where(User.username == user_info.json().get('email'))
     user_exist_data = await session.execute(user_exist_query)
     try:
         result = user_exist_data.scalars().one()
     except NoResultFound:
         try:
-            query = insert(UserData).values(**user_data)
+            query = insert(User).values(**user_data)
             await session.execute(query)
 
-            user_data = await session.execute(select(UserData).where(UserData.username == user_info.json().get('email')))
+            user_data = await session.execute(select(User).where(User.username == user_info.json().get('email')))
             user_data = user_data.one()
 
             token = generate_token(user_data[0].id)
@@ -157,5 +154,3 @@ async def auth_google(code: str, session: AsyncSession = Depends(get_async_sessi
         await session.close()
 
 
-
-app.include_router(register_router, prefix='/auth')
