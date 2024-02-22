@@ -3,7 +3,6 @@ from sqlalchemy import (
     Text, TIMESTAMP, DECIMAL, UniqueConstraint,
     Enum, MetaData, Boolean, Float
 )
-from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 import enum
@@ -11,6 +10,7 @@ from datetime import datetime
 
 Base = declarative_base()
 metadata = MetaData()
+
 
 
 class Country(Base):
@@ -48,8 +48,8 @@ class User(Base):
     last_name = Column(String(30))
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
+    address = Column(Integer, ForeignKey('address.id'))
     phone = Column(String(20), unique=True, nullable=True)
-    address = Column(Integer, ForeignKey('address.id'), nullable=True)
     password = Column(String)
     image = Column(String, nullable=True)
     is_verified = Column(Boolean, default=False)

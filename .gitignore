@@ -1,5 +1,4 @@
 .venv
 migrations/versions/
 .env
-.idea
-__pycache__
+images
