@@ -1,19 +1,18 @@
 from datetime import datetime
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, conint
 from typing import Optional, List
 
 
 class ShoppingCartScheme(BaseModel):
-    id: int
     product: dict
+    id: int
     count: int
     added_at: datetime
 
 
 class ShoppingSaveCartScheme(BaseModel):
     product_id: int
-    count: int | None = Field(gte=0)
+    count: Optional[conint(ge=0)]
 
 
 class ShippingAddressScheme(BaseModel):
@@ -29,7 +28,7 @@ class ShippingAddressGetScheme(BaseModel):
 class UserCardScheme(BaseModel):
     card_number: str = Field(max_length=16, min_length=16)
     card_expiration: str = Field(max_length=4, min_length=4)
-    card_cvc: int | None = None
+    card_cvc: Optional[int] = None
 
 
 class CardScheme(BaseModel):
@@ -46,6 +45,3 @@ class OrderSchema(BaseModel):
     shipping_address_id: int
     delivery_method_id: int
     user_card_id: Optional[int]
-
-
-
