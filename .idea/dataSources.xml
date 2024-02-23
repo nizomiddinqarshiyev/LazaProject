@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="laza_db@localhost" uuid="7300f96c-7fe0-4939-8520-52cab9fe7641">
+    <data-source source="LOCAL" name="laza_db@localhost" uuid="cc5e27d2-6345-4f88-a250-ffd172b6107c">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
