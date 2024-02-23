@@ -76,6 +76,8 @@ async def get_all_products(token: dict = Depends(verify_token),
             })
         await session.commit()
         return list
+        print(products)
+        return products
 
 
 @product_root.post('/product/delete')
@@ -158,6 +160,7 @@ async def add_category(token: dict = Depends(verify_token),
                 'category_id': category_dict
             })
         return list_dict
+        return result
 
 
 @product_root.post('/subcategory/add')
@@ -198,6 +201,9 @@ async def add_image(
 
         return {"message": "Image uploaded successfully", "image_url": image_url}
 
+        upload_folder = Path("images")
+        upload_folder.mkdir(parents=True, exist_ok=True)
+
 
 @product_root.get('/product/brands', response_model=List[Brands])
 async def get_brands(token: dict = Depends(verify_token),
@@ -208,6 +214,11 @@ async def get_brands(token: dict = Depends(verify_token),
         res = await session.execute(query)
         result = res.scalars().all()
         return result
+        file_path = upload_folder / image.filename
+        with file_path.open("wb") as file:
+            file.write(await image.read())
+
+        image_url = f"/images/{image.filename}"
 
 
 @product_root.post('/product/brands/add')
@@ -545,3 +556,8 @@ async def get_product_by_New(token: dict = Depends(verify_token),
             })
         await session.commit()
         return list
+        db_image = Image(image=image_url, product=product_id)
+        session.add(db_image)
+        await session.commit()
+
+        return {"message": "Image uploaded successfully", "image_url": image_url}
