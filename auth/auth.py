@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 import jwt
 import starlette.status as status
 from datetime import datetime
@@ -15,7 +17,7 @@ from dotenv import load_dotenv
 from passlib.context import CryptContext
 import os
 from .utils import verify_token, generate_token, send_mail
-from models.models import User
+from models.models import User, City, Country, Address
 
 load_dotenv()
 register_router = APIRouter()
@@ -153,4 +155,65 @@ async def auth_google(code: str, session: AsyncSession = Depends(get_async_sessi
     finally:
         await session.close()
 
+
+@register_router.get('/city/{id}')
+async def get_city(
+        country_id: int,
+        session: AsyncSession = Depends(get_async_session)
+):
+    query = select(City).where(City.country == country_id)
+    city__data = await session.execute(query)
+    city_data = city__data.scalars().all()
+    arr = []
+    for city in city_data:
+        arr.append({
+            'id': city.id,
+            'name': city.name
+        })
+    return arr
+
+
+@register_router.post('/city-add')
+async def create_city(
+        city_data: CityAddScheme,
+
+        session: AsyncSession = Depends(get_async_session)
+):
+    query = insert(City).values(**city_data.dict())
+    await session.execute(query)
+    await session.commit()
+    return {'success': True, 'message': 'City created'}
+
+
+@register_router.post('/country-add')
+async def create_country(
+        country_name: str,
+        code: str,
+        session: AsyncSession = Depends(get_async_session)
+):
+    query = insert(Country).values(name=country_name, code=code)
+    await session.execute(query)
+    await session.commit()
+    return {'success': True, 'message': 'Country created'}
+
+
+@register_router.get('/countries', response_model=List[CountryScheme])
+async def list_countries(
+        session: AsyncSession = Depends(get_async_session)
+):
+    query = select(Country)
+    result = await session.execute(query)
+    countries = result.scalars().all()
+    return countries
+
+
+@register_router.post('/add-address')
+async def add_address(
+        address: AddressPOSTScheme,
+        session: AsyncSession = Depends(get_async_session)
+):
+    query = insert(Address).values(**address.dict())
+    data = await session.execute(query)
+    print(data)
+    return {'success': True, 'message': 'Address successfully saved'}
 

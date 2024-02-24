@@ -4,7 +4,7 @@ from pathlib import Path
 
 from _ctypes_test import func
 from fastapi import Depends, APIRouter, HTTPException, UploadFile, File
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 
 from auth.utils import verify_token
 from database import get_async_session
@@ -80,7 +80,7 @@ async def get_all_products(token: dict = Depends(verify_token),
         return products
 
 
-@product_root.post('/product/delete')
+@product_root.delete('/product/delete')
 async def delete_product(
         product_id: int,
         token: dict = Depends(verify_token),
@@ -257,7 +257,7 @@ async def add_color(model: ColorsAdd,
         return {"success": True, "message": "Added successfully"}
 
 
-@product_root.get('/product/Prductcolor', response_model=List[ProductColors])
+@product_root.get('/product/Productcolor', response_model=List[ProductColors])
 async def get_ProductColor(token: dict = Depends(verify_token),
                            session: AsyncSession = Depends(get_async_session)
                            ):
@@ -561,3 +561,61 @@ async def get_product_by_New(token: dict = Depends(verify_token),
         await session.commit()
 
         return {"message": "Image uploaded successfully", "image_url": image_url}
+
+
+@product_root.get('/search-product', response_model=List[get_product_list])
+async def search_product(
+    name : str,
+    session: AsyncSession = Depends(get_async_session)
+):
+    query = select(Product).where(Product.name.ilike(f"%{name}%"))
+    products = await session.execute(query)
+    list = []
+    product_data = products.scalars().all()
+    if product_data is not None:
+        for product in product_data:
+            query_brand = select(Brand).where(Brand.id == product.brand_id)
+            brand = await session.execute(query_brand)
+            brand_detail = brand.first()
+            brand_dict = {}
+            if brand_detail is not None:
+                brand_dict = {
+                    'id': brand_detail[0].id,
+                    'name': brand_detail[0].name
+                }
+            query_category = select(Category).where(Category.id == product.category_id)
+            category = await session.execute(query_category)
+            category_detail = category.first()
+            # print(category_detail)
+            category_dict = {}
+            if category_detail is not None:
+                category_dict = {
+                    'id': category_detail[0].id,
+                    'name': category_detail[0].name
+                }
+            query_subcategory = select(Subcategory).where(Subcategory.id == product.subcategory_id)
+            subcategory = await  session.execute(query_subcategory)
+            subcategroy_detail = subcategory.first()
+            subcategory_dict = {}
+            if subcategroy_detail is not None:
+                subcategory_dict = {
+                    'id': subcategroy_detail[0].id,
+                    'name': subcategroy_detail[0].name,
+                    'category_id': subcategroy_detail[0].category_id
+                }
+            list.append({
+                'id': product.id,
+                'brand_id': brand_dict,
+                'name': product.name,
+                'price': product.price,
+                'quantity': product.quantity,
+                'created_at': product.created_at,
+                'sold_quantity': product.sold_quantity,
+                'description': product.description,
+                'category_id': category_dict,
+                'subcategory_id': subcategory_dict
+            })
+    else:
+        raise NoResultFound('Product not found')
+    return list
+
