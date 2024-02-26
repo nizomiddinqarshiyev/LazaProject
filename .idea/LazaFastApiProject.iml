@@ -5,7 +5,12 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
+<<<<<<< HEAD
+    <orderEntry type="jdk" jdkName="Python 3.9 (BITIRUV_PROYEKT)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (LazaProject)" jdkType="Python SDK" />
+=======
     <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
+>>>>>>> f4e176679757e8b139272299039f58a1b7ab1dd8
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

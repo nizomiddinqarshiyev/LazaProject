@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-<<<<<<< HEAD
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9" project-jdk-type="Python SDK" />
-=======
-  <component name="Black">
-    <option name="sdkName" value="Python 3.11 (LazaFastApiProject)" />
-  </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (LazaFastApiProject) (2)" project-jdk-type="Python SDK" />
->>>>>>> 91e2aae5e4b852452a1698dc475b3a69297d90fa
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (BITIRUV_PROYEKT)" project-jdk-type="Python SDK" />
 </project>
