@@ -157,7 +157,7 @@ async def auth_google(code: str, session: AsyncSession = Depends(get_async_sessi
 
 
 @register_router.get('/city/{id}')
-async def get_city(
+async def city(
         country_id: int,
         session: AsyncSession = Depends(get_async_session)
 ):
@@ -176,7 +176,6 @@ async def get_city(
 @register_router.post('/city-add')
 async def create_city(
         city_data: CityAddScheme,
-
         session: AsyncSession = Depends(get_async_session)
 ):
     query = insert(City).values(**city_data.dict())
