@@ -1,7 +1,9 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, conint
 from typing import Optional, List
+from typing import Union
 
+from pydantic import BaseModel, Field
 
 class ShoppingCartScheme(BaseModel):
     product: dict
@@ -45,3 +47,38 @@ class OrderSchema(BaseModel):
     shipping_address_id: int
     delivery_method_id: int
     user_card_id: Optional[int]
+class ReviewCreate(BaseModel):
+    message: Union[str, None]
+    product_id: int
+    star: float
+
+
+class ReviewGet(BaseModel):
+    id: int
+    message: str
+    user_id: int
+    product_id: int
+    star: float
+
+
+class LikeScheme(BaseModel):
+    product_id: int
+
+class LikeGet(BaseModel):
+    id: int
+    user_id: int
+    product: int
+    description: str
+    title: str
+
+
+class WishlistScheme(BaseModel):
+    user_id: int
+    product_id: int
+
+
+
+class WishlistGet(BaseModel):
+    id: int
+    user_id: int
+    product_id: int

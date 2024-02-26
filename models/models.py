@@ -298,3 +298,20 @@ class UserRole(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     role_id = Column(Integer, ForeignKey('role.id'))
     chat_id = Column(Integer)
+
+
+class Like(Base):
+    __tablename__ = 'like'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    product_id = Column(Integer, ForeignKey('product.id'))
+
+
+class Wishlist(Base):
+    __tablename__ = 'wishlist'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    product_id = Column(Integer, ForeignKey('product.id'))
+

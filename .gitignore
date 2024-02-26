@@ -2,3 +2,5 @@
 migrations/versions/
 .env
 images
+.idea
+__pycache__
