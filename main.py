@@ -29,7 +29,6 @@ app.include_router(product_root, prefix='/product')
 app.include_router(register_router, prefix='/auth')
 app.include_router(purchasing_system, prefix='/purchasing')
 app.mount('/media', StaticFiles(directory='media'), 'templates')
-<<<<<<< Updated upstream
 app.include_router(register_router, prefix='/auth')
 
 
@@ -180,5 +179,4 @@ async def get_user_wishlist(token: dict = Depends(verify_token), db: Session = D
 
 
 
-=======
->>>>>>> Stashed changes
+
