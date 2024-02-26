@@ -12,7 +12,6 @@ Base = declarative_base()
 metadata = MetaData()
 
 
-
 class Country(Base):
     __tablename__ = 'country'
     metadata = metadata
@@ -34,8 +33,6 @@ class Address(Base):
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
-    longitude = Column(Float)
-    latitude = Column(Float)
     city_id = Column(Integer, ForeignKey('city.id'))
     country_id = Column(Integer, ForeignKey('country.id'))
 
@@ -185,6 +182,8 @@ class ProductOrder(Base):
     __tablename__ = 'product_order'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
+    color_id = Column(Integer, ForeignKey('color.id'))
+    size_id = Column(Integer, ForeignKey('size.id'))
     product_id = Column(Integer, ForeignKey('product.id'))
     order_id = Column(Integer, ForeignKey('order.id'))
 
@@ -193,10 +192,12 @@ class ShippingAddress(Base):
     __tablename__ = 'shipping_address'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(length=30))
+    phone_number = Column(String(length=9))
     user_id = Column(Integer, ForeignKey('user.id'))
     shipping_address = Column(Text)
-    longitude = Column(Float)
-    latitude = Column(Float)
+    longitude = Column(Float, default=False)
+    latitude = Column(Float, default=False)
 
 
 class DeliveryMethod(Base):

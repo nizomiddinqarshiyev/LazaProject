@@ -59,37 +59,46 @@ async def get_shopping_cart(
 
     query = select(ShoppingCart).where(ShoppingCart.user_id == token.get('user_id'))
     shopping_data = await session.execute(query)
+    shopping__data = shopping_data.scalars().all()
+    print(shopping__data)
     shopping_list = []
 
-    for data in shopping_data:
-        product_detail = data.product
-        subcategory_name = (await session.execute(
-            select(Subcategory.name).where(Subcategory.id == product_detail.subcategory_id))).scalar()
-        brand_name = (await session.execute(select(Brand.name).where(Brand.id == product_detail.brand_id))).scalar()
-        category_name = (
-            await session.execute(select(Category.name).where(Category.id == product_detail.category_id))).scalar()
-        product_dict = ({'id': product_detail.id,
-                         "name": product_detail.name,
-                         "price": product_detail.price,
-                         "description": product_detail.description,
-                         "subcategory_name": subcategory_name,
-                         "quantity": product_detail.quantity,
-                         "brand_name": brand_name,
-                         "sold_quantity": product_detail.sold_quantity,
-                         "category_name": category_name,
-                         "category": product_detail.category.name if product_detail.category else None,
-                         "created_at": product_detail.created_at,
-                         })
-        shopping_list.append({
-            'product': product_dict})
+    for data in shopping__data:
+        products_data = data.product_id
+        print(products_data)
 
-        shopping_dict = {
-            'id': data.id,
-            'product': product_dict,
-            'count': data.count,
-            'added_at': data.added_at
-        }
-        shopping_list.append(shopping_dict)
+        product__detail = select(Product).where(Product.id == products_data)
+        execute1 = await session.execute(product__detail)
+        execute2 = execute1.scalars().all()
+
+        for product_detail in execute2:
+            if product_detail:
+                subcategory_name = (await session.execute(
+                    select(Subcategory.name).where(Subcategory.id == product_detail.subcategory_id))).scalar()
+                brand_name = (await session.execute(select(Brand.name).where(Brand.id == product_detail.brand_id))).scalar()
+                category_name = (
+                    await session.execute(select(Category.name).where(Category.id == product_detail.category_id))).scalar()
+
+                product_dict = {
+                    'id': product_detail.id,
+                    "name": product_detail.name,
+                    "price": product_detail.price,
+                    "description": product_detail.description,
+                    "subcategory_name": subcategory_name,
+                    "quantity": product_detail.quantity,
+                    "brand_name": brand_name,
+                    "sold_quantity": product_detail.sold_quantity,
+                    "category_name": category_name,
+                    "created_at": product_detail.created_at,
+                }
+
+                shopping_dict = {
+                    'product': product_dict,
+                    'id': data.id,
+                    'count': data.count,
+                    'added_at': data.added_at
+                }
+                shopping_list.append(shopping_dict)
 
     return shopping_list
 
@@ -258,14 +267,14 @@ async def get_order(token: dict = Depends(verify_token), session: AsyncSession =
                 await session.execute(
                     select(DeliveryMethod).where(DeliveryMethod.id == info.delivery_method_id))).scalar()
 
-            cards_data = collect_to_list(user_card_info)
-            products.append({f"{count}. order": {'id': info.id}, "user_id": info.user_id, 'status': info.status,
-                             'shipping_address': shipping_address_info, 'user_card': cards_data,
-                             'payment_method': info.payment_method,
-                             'delivery_method': {'delivery_company': delivery_method_info.delivery_company,
-                                                 'delivery_day': delivery_method_info.delivery_day,
-                                                 'delivery_price': delivery_method_info.delivery_price},
-                             'ordered_at': info.ordered_at})
+        cards_data = collect_to_list(user_card_info)
+        products.append({f"{count}. order": {'id': info.id}, "user_id": info.user_id, 'status': info.status,
+                         'shipping_address': shipping_address_info, 'user_card': cards_data,
+                         'payment_method': info.payment_method,
+                         'delivery_method': {'delivery_company': delivery_method_info.delivery_company,
+                                             'delivery_day': delivery_method_info.delivery_day,
+                                             'delivery_price': delivery_method_info.delivery_price},
+                         'ordered_at': info.ordered_at})
 
         for product in products_info:
             subcategory_name = (await session.execute(
@@ -273,6 +282,8 @@ async def get_order(token: dict = Depends(verify_token), session: AsyncSession =
             brand_name = (await session.execute(select(Brand.name).where(Brand.id == product.brand_id))).scalar()
             category_name = (
                 await session.execute(select(Category.name).where(Category.id == product.category_id))).scalar()
+            print(product.category_id)
+            print(category_name)
             datas = ({'id': product.id,
                       "name": product.name,
                       "price": product.price,
@@ -282,7 +293,6 @@ async def get_order(token: dict = Depends(verify_token), session: AsyncSession =
                       "brand_name": brand_name,
                       "sold_quantity": product.sold_quantity,
                       "category_name": category_name,
-                      "category": product.category.name if product.category else None,
                       "created_at": product.created_at,
                       })
             products.append({
