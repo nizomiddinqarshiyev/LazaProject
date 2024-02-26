@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List,Union
 
 
 class ShoppingCartScheme(BaseModel):
@@ -13,7 +13,7 @@ class ShoppingCartScheme(BaseModel):
 
 class ShoppingSaveCartScheme(BaseModel):
     product_id: int
-    count: int | None = Field(gte=0)
+    count: Union[int, None] = Field(gte=0)
 
 
 class ShippingAddressScheme(BaseModel):
@@ -29,7 +29,7 @@ class ShippingAddressGetScheme(BaseModel):
 class UserCardScheme(BaseModel):
     card_number: str = Field(max_length=16, min_length=16)
     card_expiration: str = Field(max_length=4, min_length=4)
-    card_cvc: int | None = None
+    card_cvc: Union[int ,None] = None
 
 
 class CardScheme(BaseModel):

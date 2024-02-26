@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel
-
+from sqlalchemy import Date, DateTime, TIMESTAMP
 
 
 class get_category(BaseModel):
@@ -14,6 +14,7 @@ class subcategroy_list(BaseModel):
     name: str
     category_id: get_category
 
+
 class subcategroy_list_for_product(BaseModel):
     id: int
     name: str
@@ -23,7 +24,6 @@ class subcategroy_list_for_product(BaseModel):
 class Brands(BaseModel):
     id: int
     name: str
-
 
 
 class get_product_list(BaseModel):
@@ -37,7 +37,6 @@ class get_product_list(BaseModel):
     description: str
     category_id: get_category
     subcategory_id: subcategroy_list_for_product
-
 
 
 class get_product_list_for_productcolor(BaseModel):
@@ -63,14 +62,8 @@ class add_product(BaseModel):
     subcategory_id: int
 
 
-
-
-
 class add_category(BaseModel):
     name: str
-
-
-
 
 
 class Add_subcategory(BaseModel):
@@ -97,3 +90,23 @@ class ProductColors(BaseModel):
     color_id: Colors
 
 
+class Discounts(BaseModel):
+    id: int
+    title: str
+    discount: int
+    created_at: datetime
+    start_date: datetime
+    end_date: datetime
+
+
+class DiscountsAdd(BaseModel):
+    title: str
+    discount: int
+    start_date: datetime
+    end_date: datetime
+
+
+class Product_Discount(BaseModel):
+    id:int
+    product_id:int
+    discount_id:int

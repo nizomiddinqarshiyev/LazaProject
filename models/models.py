@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, ForeignKey, Integer, String,
     Text, TIMESTAMP, DECIMAL, UniqueConstraint,
-    Enum, MetaData, Boolean, Float
+    Enum, MetaData, Boolean, Float, Date
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -135,8 +135,8 @@ class Discount(Base):
     title = Column(String)
     discount = Column(Integer)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    start_date = Column(TIMESTAMP)
-    end_date = Column(TIMESTAMP)
+    start_date = Column(Date)
+    end_date = Column(Date)
 
 
 class ProductDiscount(Base):

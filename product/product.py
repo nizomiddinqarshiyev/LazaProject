@@ -14,9 +14,10 @@ from typing import List
 import aiofiles
 from starlette.responses import FileResponse, JSONResponse
 
-from models.models import Product, Category, Subcategory, Image, Review, Brand, Color, ProductColor
+from models.models import Product, Category, Subcategory, Image, Review, Brand, Color, ProductColor, Discount, \
+    ProductDiscount
 from product.schemes import get_product_list, add_product, get_category, add_category, subcategroy_list, \
-    Add_subcategory, Brands, BrandsAdd, Colors, ColorsAdd, ProductColors
+    Add_subcategory, Brands, BrandsAdd, Colors, ColorsAdd, ProductColors, Discounts, DiscountsAdd, Product_Discount
 
 product_root = APIRouter()
 
@@ -561,3 +562,58 @@ async def get_product_by_New(token: dict = Depends(verify_token),
         await session.commit()
 
         return {"message": "Image uploaded successfully", "image_url": image_url}
+
+
+@product_root.get('/product/Discount', response_model=List[Discounts])
+async def get_dicounts(token: dict = Depends(verify_token),
+                       session: AsyncSession = Depends(get_async_session)
+                       ):
+    if token is not None:
+        query = select(Discount)
+        res = await session.execute(query)
+        result = res.scalars().all()
+        return result
+
+
+@product_root.post('/product/Discount/Add')
+async def get_dicounts(model: DiscountsAdd,
+                       token: dict = Depends(verify_token),
+                       session: AsyncSession = Depends(get_async_session)
+                       ):
+    if token is not None:
+        query = insert(Discount).values(**dict(model))
+        await session.execute(query)
+        await session.commit()
+        return {"success": True, "message": "Added"}
+
+
+@product_root.post('/product/DiscountProduct/Add')
+async def add_ProductDiscount(product_id: int,
+                              discount_id: int,
+                              token: dict = Depends(verify_token),
+                              session: AsyncSession = Depends(get_async_session)
+                              ):
+    if token is not None:
+        query = select(Product).filter(Product.id == product_id)
+        res = await session.execute(query)
+        if res.scalar():
+            query = select(Discount).filter(Discount.id == discount_id)
+            res = await session.execute(query)
+            if res.scalar():
+                query = insert(ProductDiscount).values(product_id=product_id, discount_id=discount_id)
+                await session.execute(query)
+                await session.commit()
+                return {"success": True, "message": "Added successfully!"}
+        else:
+            return {"success": False, "message": "Product not found"}
+
+
+@product_root.get('/product/DiscountProduct', response_model=List[Product_Discount])
+async def get_ProductDiscount(token: dict = Depends(verify_token),
+                              session: AsyncSession = Depends(get_async_session)
+                              ):
+    if token is not None:
+        query = select(ProductDiscount)
+        res = await session.execute(query)
+        result = res.scalars().all()
+        return result
