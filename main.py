@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 from starlette.staticfiles import StaticFiles
 
 from auth.auth import register_router
-from auth.auth import register_router
 from market.market import purchasing_system
 
 from auth.utils import verify_token
