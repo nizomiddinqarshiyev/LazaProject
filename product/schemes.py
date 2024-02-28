@@ -106,7 +106,7 @@ class DiscountsAdd(BaseModel):
     end_date: datetime
 
 
-class Product_Discount(BaseModel):
+class ProductDiscountScheme(BaseModel):
     id:int
     product_id:int
     discount_id:int

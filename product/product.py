@@ -12,12 +12,13 @@ from sqlalchemy import select, insert, update, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 import aiofiles
-from starlette.responses import FileResponse, JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse
 
 from models.models import Product, Category, Subcategory, Image, Review, Brand, Color, ProductColor, Discount, \
     ProductDiscount
 from product.schemes import get_product_list, add_product, get_category, add_category, subcategroy_list, \
-    Add_subcategory, Brands, BrandsAdd, Colors, ColorsAdd, ProductColors, Discounts, DiscountsAdd, Product_Discount
+    Add_subcategory, Brands, BrandsAdd, Colors, ColorsAdd, ProductColors, Discounts, DiscountsAdd, ProductDiscountScheme
 
 product_root = APIRouter()
 
@@ -30,10 +31,8 @@ async def get_all_products(token: dict = Depends(verify_token),
         query = select(Product)
         res = await session.execute(query)
         products = res.scalars().all()
-        # print(products)
         list = []
         for product in products:
-            # print(product[1])
             query_brand = select(Brand).where(Brand.id == product.brand_id)
             brand = await session.execute(query_brand)
             brand_detail = brand.first()
@@ -46,7 +45,6 @@ async def get_all_products(token: dict = Depends(verify_token),
             query_category = select(Category).where(Category.id == product.category_id)
             category = await session.execute(query_category)
             category_detail = category.first()
-            # print(category_detail)
             category_dict = {}
             if category_detail is not None:
                 category_dict = {
@@ -77,8 +75,6 @@ async def get_all_products(token: dict = Depends(verify_token),
             })
         await session.commit()
         return list
-        print(products)
-        return products
 
 
 @product_root.delete('/product/delete')
@@ -258,56 +254,69 @@ async def add_color(model: ColorsAdd,
         return {"success": True, "message": "Added successfully"}
 
 
-@product_root.get('/product/Productcolor', response_model=List[ProductColors])
-async def get_ProductColor(token: dict = Depends(verify_token),
-                           session: AsyncSession = Depends(get_async_session)
+@product_root.get('/product/product-color/{id}')
+async def get_product_color(
+        product_id: int,
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
                            ):
     if token is not None:
-        query = select(ProductColor)
+        # query_product = select(Product).where(Product.id == product_id)
+        # product_data = await session.execute(query_product)
+        # product = product_data.scalars().one()
+        query = select(ProductColor).filter(ProductColor.product_id == product_id)
         res = await session.execute(query)
         result = res.scalars().all()
-        list_productcolor = []
-        for productcolor in result:
-            query_productcolor = select(Product).where(Product.id == productcolor.product_id)
-            productcolor_query = await session.execute(query_productcolor)
-            product_detail = productcolor_query.first()
-            productcolor_dict = {}
-            if product_detail is not None:
-                productcolor_dict = {
-                    'id': product_detail[0].id,
-                    'brand_id': product_detail[0].brand_id,
-                    'name': product_detail[0].name,
-                    'price': product_detail[0].price,
-                    'quantity': product_detail[0].quantity,
-                    'created_at': product_detail[0].created_at,
-                    'sold_quantity': product_detail[0].sold_quantity,
-                    'description': product_detail[0].description,
-                    'category_id': product_detail[0].category_id,
-                    'subcategory_id': product_detail[0].subcategory_id
-                }
-            color_query = select(Color).where(Color.id == productcolor.color_id)
-            color_detail = await session.execute(color_query)
-            color_result = color_detail.first()
-            color_dict = {}
-            if color_result is not None:
-                color_dict = {
-                    'id': color_result[0].id,
-                    'code': color_result[0].code
-                }
-            list_productcolor.append({
-                'id': productcolor.id,
-                'product_id': productcolor_dict,
-                'color_id': color_dict
+        list_product_color = []
+        for product_color in result:
+            query_color = select(Color).where(Color.id == product_color.color_id)
+            color_data = await session.execute(query_color)
+            color = color_data.scalars().one()
+            list_product_color.append({
+                "id": color.id,
+                "color": color.code
             })
-        await session.commit()
-        return list_productcolor
+        # for product_color in result:
+        #     query_product_color = select(Product).where(Product.id == product_color.product_id)
+        #     product_color_query = await session.execute(query_product_color)
+        #     product_detail = product_color_query.first()
+        #     product_color_dict = {}
+        #     if product_detail is not None:
+        #         product_color_dict = {
+        #             'id': product_detail[0].id,
+        #             'brand_id': product_detail[0].brand_id,
+        #             'name': product_detail[0].name,
+        #             'price': product_detail[0].price,
+        #             'quantity': product_detail[0].quantity,
+        #             'created_at': product_detail[0].created_at,
+        #             'sold_quantity': product_detail[0].sold_quantity,
+        #             'description': product_detail[0].description,
+        #             'category_id': product_detail[0].category_id,
+        #             'subcategory_id': product_detail[0].subcategory_id
+        #         }
+        #     color_query = select(Color).where(Color.id == product_color.color_id)
+        #     color_detail = await session.execute(color_query)
+        #     color_result = color_detail.first()
+        #     color_dict = {}
+        #     if color_result is not None:
+        #         color_dict = {
+        #             'id': color_result[0].id,
+        #             'code': color_result[0].code
+        #         }
+        #     list_product_color.append({
+        #         'id': product_color.id,
+        #         'product_id': product_color_dict,
+        #         'color_id': color_dict
+        #     })
+        return list_product_color
 
 
-@product_root.post('/product/Prductcolor/add')
-async def add_ProductColor(product_id: int,
-                           color_id: int,
-                           token: dict = Depends(verify_token),
-                           session: AsyncSession = Depends(get_async_session)
+@product_root.post('/product/product_color/add')
+async def add_product_color(
+        product_id: int,
+        color_id: int,
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
                            ):
     if token is not None:
         product_query = await session.execute(select(Product).filter(Product.id == product_id))
@@ -336,10 +345,8 @@ async def get_product_by_brand(brand: int,
         query = select(Product).where(Product.brand_id == brand)
         res = await session.execute(query)
         products = res.scalars().all()
-        # print(products)
         list = []
         for product in products:
-            # print(product[1])
             query_brand = select(Brand).where(Brand.id == product.brand_id)
             brand = await session.execute(query_brand)
             brand_detail = brand.first()
@@ -352,7 +359,6 @@ async def get_product_by_brand(brand: int,
             query_category = select(Category).where(Category.id == product.category_id)
             category = await session.execute(query_category)
             category_detail = category.first()
-            # print(category_detail)
             category_dict = {}
             if category_detail is not None:
                 category_dict = {
@@ -394,10 +400,8 @@ async def get_product_by_category(category: int,
         query = select(Product).where(Product.category_id == category)
         res = await session.execute(query)
         products = res.scalars().all()
-        # print(products)
         list = []
         for product in products:
-            # print(product[1])
             query_brand = select(Brand).where(Brand.id == product.brand_id)
             brand = await session.execute(query_brand)
             brand_detail = brand.first()
@@ -410,7 +414,6 @@ async def get_product_by_category(category: int,
             query_category = select(Category).where(Category.id == product.category_id)
             category = await session.execute(query_category)
             category_detail = category.first()
-            # print(category_detail)
             category_dict = {}
             if category_detail is not None:
                 category_dict = {
@@ -444,18 +447,17 @@ async def get_product_by_category(category: int,
 
 
 @product_root.get('/product/sort_by_subcategory', response_model=List[get_product_list])
-async def get_product_by_subcategory(subcategory: int,
-                                     token: dict = Depends(verify_token),
-                                     session: AsyncSession = Depends(get_async_session)
+async def get_product_by_subcategory(
+        subcategory: int,
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
                                      ):
     if token is not None:
         query = select(Product).where(Product.subcategory_id == subcategory)
         res = await session.execute(query)
         products = res.scalars().all()
-        # print(products)
         list = []
         for product in products:
-            # print(product[1])
             query_brand = select(Brand).where(Brand.id == product.brand_id)
             brand = await session.execute(query_brand)
             brand_detail = brand.first()
@@ -468,7 +470,6 @@ async def get_product_by_subcategory(subcategory: int,
             query_category = select(Category).where(Category.id == product.category_id)
             category = await session.execute(query_category)
             category_detail = category.first()
-            # print(category_detail)
             category_dict = {}
             if category_detail is not None:
                 category_dict = {
@@ -502,7 +503,7 @@ async def get_product_by_subcategory(subcategory: int,
 
 
 @product_root.get('/product/sort_by_new_one', response_model=List[get_product_list])
-async def get_product_by_New(token: dict = Depends(verify_token),
+async def get_product_by_new(token: dict = Depends(verify_token),
                              session: AsyncSession = Depends(get_async_session)
                              ):
     if token is not None:
@@ -510,10 +511,8 @@ async def get_product_by_New(token: dict = Depends(verify_token),
         query = select(Product).where(Product.created_at >= seven_days)
         res = await session.execute(query)
         products = res.scalars().all()
-        # print(products)
         list = []
         for product in products:
-            # print(product[1])
             query_brand = select(Brand).where(Brand.id == product.brand_id)
             brand = await session.execute(query_brand)
             brand_detail = brand.first()
@@ -526,7 +525,6 @@ async def get_product_by_New(token: dict = Depends(verify_token),
             query_category = select(Category).where(Category.id == product.category_id)
             category = await session.execute(query_category)
             category_detail = category.first()
-            # print(category_detail)
             category_dict = {}
             if category_detail is not None:
                 category_dict = {
@@ -565,7 +563,7 @@ async def get_product_by_New(token: dict = Depends(verify_token),
 
 
 @product_root.get('/product/Discount', response_model=List[Discounts])
-async def get_dicounts(token: dict = Depends(verify_token),
+async def get_discounts(token: dict = Depends(verify_token),
                        session: AsyncSession = Depends(get_async_session)
                        ):
     if token is not None:
@@ -588,10 +586,11 @@ async def get_dicounts(model: DiscountsAdd,
 
 
 @product_root.post('/product/DiscountProduct/Add')
-async def add_ProductDiscount(product_id: int,
-                              discount_id: int,
-                              token: dict = Depends(verify_token),
-                              session: AsyncSession = Depends(get_async_session)
+async def add_product_discount(
+        product_id: int,
+        discount_id: int,
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
                               ):
     if token is not None:
         query = select(Product).filter(Product.id == product_id)
@@ -602,13 +601,12 @@ async def add_ProductDiscount(product_id: int,
             if res.scalar():
                 query = insert(ProductDiscount).values(product_id=product_id, discount_id=discount_id)
                 await session.execute(query)
-                await session.commit()
                 return {"success": True, "message": "Added successfully!"}
         else:
             return {"success": False, "message": "Product not found"}
 
 
-@product_root.get('/product/DiscountProduct', response_model=List[Product_Discount])
+@product_root.get('/product/DiscountProduct', response_model=List[ProductDiscount])
 async def get_ProductDiscount(token: dict = Depends(verify_token),
                               session: AsyncSession = Depends(get_async_session)
                               ):
@@ -617,6 +615,7 @@ async def get_ProductDiscount(token: dict = Depends(verify_token),
         res = await session.execute(query)
         result = res.scalars().all()
         return result
+
 
 @product_root.get('/search-product', response_model=List[get_product_list])
 async def search_product(
@@ -641,7 +640,6 @@ async def search_product(
             query_category = select(Category).where(Category.id == product.category_id)
             category = await session.execute(query_category)
             category_detail = category.first()
-            # print(category_detail)
             category_dict = {}
             if category_detail is not None:
                 category_dict = {

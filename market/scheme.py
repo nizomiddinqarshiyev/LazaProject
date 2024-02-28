@@ -77,6 +77,7 @@ class ReviewGet(BaseModel):
 class LikeScheme(BaseModel):
     product_id: int
 
+
 class LikeGet(BaseModel):
     id: int
     user_id: int
@@ -86,12 +87,40 @@ class LikeGet(BaseModel):
 
 
 class WishlistScheme(BaseModel):
-    user_id: int
     product_id: int
-
 
 
 class WishlistGet(BaseModel):
     id: int
     user_id: int
     product_id: int
+
+
+class CityAddScheme(BaseModel):
+    name: str
+    country: int
+
+
+class CountryScheme(BaseModel):
+    id: int
+    name: str
+    code: str
+
+
+class CityScheme(BaseModel):
+    id: int
+    name: str
+    country: CountryScheme
+
+
+class AddressScheme(BaseModel):
+    id: int
+    name: str
+    city: CityScheme
+    country: CountryScheme
+
+
+class AddressPOSTScheme(BaseModel):
+    name: str
+    city_id: int
+    country_id: int

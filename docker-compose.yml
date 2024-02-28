@@ -10,7 +10,7 @@ services:
       - .:/app
       - media_volume:/uploads
     env_file:
-      - ../LazaFastApiProject/.env
+      - ../LazaProject/.env
     ports:
       - "8000:8000"
     depends_on:
@@ -26,6 +26,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
+    entrypoint: /bin/sh -c "if [ \"\$DATABASE\" = \"postgres\" ]; then echo 'Waiting for postgres...'; while ! nc -z \$SQL_HOST \$SQL_PORT; do sleep 0.1; done; echo 'PostgreSQL started'; fi; \$@"
 
 
 volumes:
