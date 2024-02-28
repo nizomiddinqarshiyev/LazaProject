@@ -28,8 +28,6 @@ app.mount('/media', StaticFiles(directory='media'), 'files')
 app.include_router(register_router, prefix='/auth')
 
 
-
-
 @app.post("/add-review")
 async def add_review(
         new_review: ReviewCreate,
