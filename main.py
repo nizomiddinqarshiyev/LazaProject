@@ -24,7 +24,7 @@ app = FastAPI(title='User', version='1.0.0')
 app.include_router(product_root, prefix='/product')
 app.include_router(register_router, prefix='/auth')
 app.include_router(purchasing_system, prefix='/purchasing')
-app.mount('/images', StaticFiles(directory='.'), 'templates')
+app.mount('/media', StaticFiles(directory='media'), 'files')
 app.include_router(register_router, prefix='/auth')
 
 
