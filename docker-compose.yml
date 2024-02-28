@@ -28,19 +28,7 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
     entrypoint: /bin/sh -c "if [ \"\$DATABASE\" = \"postgres\" ]; then echo 'Waiting for postgres...'; while ! nc -z \$SQL_HOST \$SQL_PORT; do sleep 0.1; done; echo 'PostgreSQL started'; fi; \$@"
 
-  nginx:
-    build: ./nginx
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-    volumes:
-      #      - static_volume:/app/static
-      - media_volume:/media
-    ports:
-      - "443:443"
-    depends_on:
-      - fastapi
+
 
 volumes:
   media_volume:
