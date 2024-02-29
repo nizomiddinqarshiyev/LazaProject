@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-<<<<<<< HEAD
-    <data-source source="LOCAL" name="p15laza@localhost" uuid="6ad0e7f0-6fe4-4b3f-a9a8-1541504eb723">
-=======
-    <data-source source="LOCAL" name="laza_db@localhost" uuid="cc5e27d2-6345-4f88-a250-ffd172b6107c">
->>>>>>> f4e176679757e8b139272299039f58a1b7ab1dd8
+    <data-source source="LOCAL" name="p15laza@localhost" uuid="8a918e0b-8300-4c74-bf37-646a03a8ce8e">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
