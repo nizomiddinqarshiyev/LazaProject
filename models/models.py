@@ -41,8 +41,8 @@ class User(Base):
     __tablename__ = 'user'
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
-    first_name = Column(String(30))
-    last_name = Column(String(30))
+    first_name = Column(String(30), nullable=True)
+    last_name = Column(String(30), nullable=True)
     username = Column(String(50), unique=True)
     email = Column(String(50), unique=True)
     address = Column(Integer, ForeignKey('address.id'))
@@ -52,6 +52,7 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     registration_at = Column(TIMESTAMP, default=datetime.utcnow)
     birth_date = Column(TIMESTAMP, nullable=True)
+    UniqueConstraint('username', 'email', 'phone', name='unique_username_email_phone')
 
 
 class Category(Base):
@@ -76,6 +77,7 @@ class Brand(Base):
     metadata = metadata
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
+    image = Column(String)
 
 
 class Product(Base):
@@ -299,3 +301,20 @@ class UserRole(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     role_id = Column(Integer, ForeignKey('role.id'))
     chat_id = Column(Integer)
+
+
+class Like(Base):
+    __tablename__ = 'like'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    product_id = Column(Integer, ForeignKey('product.id'))
+
+
+class Wishlist(Base):
+    __tablename__ = 'wishlist'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    product_id = Column(Integer, ForeignKey('product.id'))
+
