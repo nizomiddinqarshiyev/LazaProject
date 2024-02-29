@@ -239,6 +239,7 @@ class Image(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     image = Column(String)
     product = Column(Integer, ForeignKey('product.id'))
+    hashcode=Column(String)
 
 
 class ShoppingCart(Base):

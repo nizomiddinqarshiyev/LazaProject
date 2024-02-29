@@ -1,11 +1,12 @@
 import datetime
+import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
 
 from _ctypes_test import func
 from fastapi import Depends, APIRouter, HTTPException, UploadFile, File
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
-
+from fastapi.responses import FileResponse
 from auth.utils import verify_token
 from database import get_async_session
 from sqlalchemy import select, insert, update, delete, func
@@ -75,6 +76,70 @@ async def get_all_products(token: dict = Depends(verify_token),
             })
         await session.commit()
         return list
+
+
+
+
+@product_root.get('/product/{Product_id}', response_model=List[get_product_list])
+async def get_all_products(product_id:int,
+                           token: dict = Depends(verify_token),
+                           session: AsyncSession = Depends(get_async_session)
+                           ):
+    if token is not None:
+        query = select(Product).where(Product.id==product_id)
+        res = await session.execute(query)
+        products = res.scalars().all()
+        # print(products)
+        list = []
+        for product in products:
+            # print(product[1])
+            query_brand = select(Brand).where(Brand.id == product.brand_id)
+            brand = await session.execute(query_brand)
+            brand_detail = brand.first()
+            brand_dict = {}
+            if brand_detail is not None:
+                brand_dict = {
+                    'id': brand_detail[0].id,
+                    'name': brand_detail[0].name
+                }
+            query_category = select(Category).where(Category.id == product.category_id)
+            category = await session.execute(query_category)
+            category_detail = category.first()
+            # print(category_detail)
+            category_dict = {}
+            if category_detail is not None:
+                category_dict = {
+                    'id': category_detail[0].id,
+                    'name': category_detail[0].name
+                }
+            query_subcategory = select(Subcategory).where(Subcategory.id == product.subcategory_id)
+            subcategory = await  session.execute(query_subcategory)
+            subcategroy_detail = subcategory.first()
+            subcategory_dict = {}
+            if subcategroy_detail is not None:
+                subcategory_dict = {
+                    'id': subcategroy_detail[0].id,
+                    'name': subcategroy_detail[0].name,
+                    'category_id': subcategroy_detail[0].category_id
+                }
+            list.append({
+                'id': product.id,
+                'brand_id': brand_dict,
+                'name': product.name,
+                'price': product.price,
+                'quantity': product.quantity,
+                'created_at': product.created_at,
+                'sold_quantity': product.sold_quantity,
+                'description': product.description,
+                'category_id': category_dict,
+                'subcategory_id': subcategory_dict
+            })
+        await session.commit()
+        return list
+        # print(products)
+        return products
+
+
 
 
 @product_root.delete('/product/delete')
@@ -172,34 +237,45 @@ async def add_subcategory(model: Add_subcategory, token: dict = Depends(verify_t
 
 
 @product_root.post('/upload-image')
-async def add_image(
-        product_id: int,
-        image: UploadFile = File(...),
+async def product_add(upload_file: UploadFile,
+                      product_id : int,
+                      token: dict = Depends(verify_token),
+                      session: AsyncSession = Depends(get_async_session)):
+    if token is not None:
+        name = upload_file.filename
+        out_file = f'images/{name}'
+        async with aiofiles.open(out_file, 'wb') as zipf:
+            content = await upload_file.read()
+            await zipf.write(content)
+        hashcode = secrets.token_hex(32)
+        query = insert(Image).values( image=name, hashcode=hashcode,product=product_id)
+        await session.execute(query)
+        await session.commit()
+        return {'success': True, 'message': 'Product added!'}
+
+
+
+@product_root.get('/download-image/{hashcode}')
+async def download_image(
+        hashcode: str,
         token: dict = Depends(verify_token),
         session: AsyncSession = Depends(get_async_session)
 ):
     if token is not None:
-        product = await session.execute(select(Product).filter(Product.id == product_id))
-        if not product.scalar():
-            return JSONResponse(status_code=404, content={"message": "Product not found"})
+        if hashcode is None:
+            raise HTTPException(status_code=404, detail="Invalid hashcode")
 
-        upload_folder = Path("images")
-        upload_folder.mkdir(parents=True, exist_ok=True)
+        query = select(Image).where(Image.hashcode == hashcode)
+        file = await session.execute(query)
+        file_data = file.fetchone()
 
-        file_path = upload_folder / image.filename
-        with file_path.open("wb") as file:
-            file.write(await image.read())
+        if file_data is None:
+            raise HTTPException(status_code=404, detail="File not found")
 
-        image_url = f"/images/{image.filename}"
+        file_url = file_data.url
+        file_name = file_data.image
+        return FileResponse(path=file_url, media_type='application/octet-stream', filename=file_name)
 
-        db_image = Image(image=image_url, product=product_id)
-        session.add(db_image)
-        await session.commit()
-
-        return {"message": "Image uploaded successfully", "image_url": image_url}
-
-        upload_folder = Path("images")
-        upload_folder.mkdir(parents=True, exist_ok=True)
 
 
 @product_root.get('/product/brands', response_model=List[Brands])
