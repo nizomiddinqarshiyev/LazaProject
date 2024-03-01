@@ -52,16 +52,17 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
 def send_mail(receiver_email, code):
     # Email configuration
-    sender_email = 'ruslanovrahmet@gmail.com'
+    sender_email = os.getenv('SENDER_EMAIL')
     message = code
 
     # SMTP server configuration for gmail
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
-    smtp_username = 'abrayovjasurbek@gmail.com'
-    smtp_password = 'khpepdvjcktvtysc'
+    smtp_username = os.environ.get('SENDER_EMAIL')
+    smtp_password = os.environ.get('SMTP_CODE')
 
     # Create a multipart message and set headers
     email_message = MIMEMultipart()
