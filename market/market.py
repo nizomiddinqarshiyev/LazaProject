@@ -28,35 +28,32 @@ async def shopping_cart_create(
 ):
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
-
     query = select(ShoppingCart).where(
         (ShoppingCart.user_id == token.get('user_id')) & (ShoppingCart.product_id == data.product_id))
     shopping_data = await session.execute(query)
     shopping_cart = shopping_data.scalar_one_or_none()
-
     if shopping_cart is not None:
         raise HTTPException(status_code=409, detail="This product already exists")
-
     try:
         query2 = insert(ShoppingCart).values(user_id=token.get('user_id'), product_id=data.product_id, count=1)
         await session.execute(query2)
         await session.commit()
-        return {'success': True, 'message': 'Added to shopping cart'}
+        return {'success': True, 'message': 'Successfully added to shopping cart'}
     except KeyError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @purchasing_system.post('/shopping-cart/count')
-async def shopping_cart_count(data: ShoppingCountCartScheme,
-                              token: dict = Depends(verify_token),
-                              session: AsyncSession = Depends(get_async_session)
+async def shopping_cart_count(
+        data: ShoppingCountCartScheme,
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
 ):
-
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
 
-    query = select(ShoppingCart).where((ShoppingCart.user_id == token.get('user_id')) & (ShoppingCart.product_id == data.product_id))
-
+    query = select(ShoppingCart).where(
+        (ShoppingCart.user_id == token.get('user_id')) & (ShoppingCart.product_id == data.product_id))
     shopping_data = await session.execute(query)
     shopping_cart = shopping_data.scalar_one_or_none()
 
@@ -71,9 +68,10 @@ async def shopping_cart_count(data: ShoppingCountCartScheme,
         updated_shopping_cart = await session.execute(query)
         updated_shopping_cart = updated_shopping_cart.scalar_one()
 
-        return {"user_id": updated_shopping_cart.user_id, "product_id": updated_shopping_cart.product_id, "count": updated_shopping_cart.count}
+        return {"user_id": updated_shopping_cart.user_id, "product_id": updated_shopping_cart.product_id,
+                "count": updated_shopping_cart.count}
     else:
-        raise HTTPException(status_code=404, detail="Shopping cart not found for the given user and product.")
+        raise HTTPException(status_code=404, detail="Shopping cart not found!")
 
 
 @purchasing_system.get('/shopping-cart', response_model=List[ShoppingCartScheme])
@@ -83,7 +81,6 @@ async def get_shopping_cart(
 ):
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
-
     try:
         query = select(ShoppingCart).where(ShoppingCart.user_id == token.get('user_id'))
         shopping_data = await session.execute(query)
@@ -104,8 +101,9 @@ async def get_shopping_cart(
 
             for product_detail in execute2:
                 if product_detail:
-                    subcategory_name = (await session.execute(
-                        select(Subcategory.name).where(Subcategory.id == product_detail.subcategory_id))).scalar()
+                    subcategory_name = (
+                        await session.execute(select(Subcategory.name).where(Subcategory.id == product_detail.subcategory_id))
+                    ).scalar()
                     brand_name = (
                         await session.execute(select(Brand.name).where(Brand.id == product_detail.brand_id))).scalar()
                     category_name = (
@@ -124,7 +122,6 @@ async def get_shopping_cart(
                         "category_name": category_name,
                         "created_at": product_detail.created_at,
                     }
-
                     shopping_dict = {
                         'product': product_dict,
                         'order_id': data.id,
@@ -142,13 +139,16 @@ async def get_shopping_cart(
 
 
 @purchasing_system.delete('/shopping_cart/delete')
-async def purchasing_cart_delete(data: ShoppingSaveCartScheme, token: dict = Depends(verify_token),
-                                 session: AsyncSession = Depends(get_async_session)
-                                 ):
+async def purchasing_cart_delete(
+        data: ShoppingSaveCartScheme, token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
+):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
 
-    query = select(ShoppingCart).where((ShoppingCart.user_id == token.get('user_id')) & (ShoppingCart.product_id == data.product_id))
+    query = select(ShoppingCart).where(
+        (ShoppingCart.user_id == token.get('user_id')) & (ShoppingCart.product_id == data.product_id))
     delete_query = await session.execute(query)
     exists = bool(delete_query.scalar())
     if exists is True:
@@ -156,7 +156,7 @@ async def purchasing_cart_delete(data: ShoppingSaveCartScheme, token: dict = Dep
             (ShoppingCart.user_id == token.get('user_id')) & (ShoppingCart.product_id == data.product_id))
         await session.execute(query2)
         await session.commit()
-        return {"message": "Shopping cart has been deleted"}
+        return {"message": "Shopping cart has been deleted successfully"}
 
 
 @purchasing_system.post('/shipping-address')
@@ -165,14 +165,15 @@ async def post_shipping_address(
         token: dict = Depends(verify_token),
         session: AsyncSession = Depends(get_async_session)
 ):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
-
     query = select(ShippingAddress).where(
         (ShippingAddress.shipping_address == shipping_address_data.shipping_address)).where(
         ShippingAddress.user_id == token.get('user_id'))
     user_exist = await session.execute(query)
     exist = bool(user_exist.scalar())
+
     if exist is not True:
         query2 = insert(ShippingAddress).values(
             user_id=token.get('user_id'),
@@ -182,7 +183,7 @@ async def post_shipping_address(
         await session.commit()
     else:
         raise HTTPException(status_code=400, detail='Shipping address already exists!')
-    return {'success': True, 'message': 'Added shipping address'}
+    return {'success': True, 'message': 'Successfully added shipping address'}
 
 
 @purchasing_system.get('/shipping-address', response_model=ShippingAddressGetScheme)
@@ -190,14 +191,13 @@ async def get_user_shipping_addresses(
         token: dict = Depends(verify_token),
         session: AsyncSession = Depends(get_async_session)
 ):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
-
     try:
         query = select(ShippingAddress).where(ShippingAddress.user_id == token.get('user_id'))
         user_shipping_data = await session.execute(query)
         shipping_address = user_shipping_data.scalar_one_or_none()
-
         if shipping_address:
             return ShippingAddressGetScheme(
                 id=shipping_address.id,
@@ -205,7 +205,7 @@ async def get_user_shipping_addresses(
                 user_id=shipping_address.user_id
             )
         else:
-            raise HTTPException(status_code=404, detail="Shipping address not found for the user")
+            raise HTTPException(status_code=404, detail="Shipping address not found!")
     except Exception as e:
         raise HTTPException(status_code=404, detail="Not found")
 
@@ -216,6 +216,7 @@ async def add_card(
         token: dict = Depends(verify_token),
         session: AsyncSession = Depends(get_async_session)
 ):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
     try:
@@ -226,7 +227,6 @@ async def add_card(
         if card_data:
             raise HTTPException(status_code=400, detail='Card already exists!')
         else:
-
             query2 = insert(UserCard).values(
                 card_number=card_number,
                 card_expiration=card_detail.card_expiration,
@@ -235,9 +235,9 @@ async def add_card(
             )
             await session.execute(query2)
             await session.commit()
-            return {'success': True, 'message': 'Successfully added'}
+            return {'success': True, 'message': 'Cart added successfully!'}
     except KeyError:
-        return {"message": "Type proper card numbers"}
+        return {"message": "Type proper card information"}
 
 
 @purchasing_system.get('/user-cards', response_model=CardScheme)
@@ -245,6 +245,7 @@ async def get_user_cards(
         token: dict = Depends(verify_token),
         session: AsyncSession = Depends(get_async_session)
 ):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
 
@@ -252,9 +253,9 @@ async def get_user_cards(
     user_data = await session.execute(query1)
     user__data = user_data.one()
     users_response = {'user': user__data[0]}
-
     query = select(UserCard.id, UserCard.card_number, UserCard.card_expiration, UserCard.user_id).where(
-        UserCard.user_id == token.get('user_id'))
+        UserCard.user_id == token.get('user_id')
+    )
     card__data = await session.execute(query)
     card_data = card__data.all()
     cards_data = collect_to_list(card_data)
@@ -263,38 +264,40 @@ async def get_user_cards(
 
 
 @purchasing_system.delete('/delete-card')
-async def delete_card(card: UserCardDelete, token: dict = Depends(verify_token),
-                      session: AsyncSession = Depends(get_async_session)):
+async def delete_card(
+        card: UserCardDelete, token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
+):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
 
     query = select(UserCard).where((UserCard.user_id == token.get('user_id')) & (UserCard.id == card.card))
     query_data = await session.execute(query)
     exist = bool(query_data.scalar())
-
     if exist is True:
         query = delete(UserCard).where((UserCard.user_id == token.get('user_id')) & (UserCard.id == card.card))
         await session.execute(query)
         await session.commit()
-        return {"message": "Card has been deleted"}
+        return {"message": "Card has been deleted successfully"}
     else:
         return {"message": "Card not found"}
 
 
-
 @purchasing_system.post("/orders")
-async def create_order(order_data: OrderSchema, token: dict = Depends(verify_token),
-                       session: AsyncSession = Depends(get_async_session)):
+async def create_order(
+        order_data: OrderSchema, token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
+):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
 
     query = select(Order).where(Order.tracking_number == order_data.tracking_number)
     execute1 = await session.execute(query)
     exist = bool(execute1.scalar())
-
     if exist:
         raise HTTPException(status_code=400, detail='Order already exists!')
-
     try:
         order = insert(Order).values(
             tracking_number=order_data.tracking_number,
@@ -311,6 +314,7 @@ async def create_order(order_data: OrderSchema, token: dict = Depends(verify_tok
             product_id=order_data.product_id,
             order_id=order_id,
         )
+
         session.add(product_order_instance)
         current_day = datetime.now()
         current_day_str = current_day.strftime("%Y-%m-%d")
@@ -320,6 +324,7 @@ async def create_order(order_data: OrderSchema, token: dict = Depends(verify_tok
         query7 = update(DeliveryMethod).values(delivery_day=formatted_delivery_day)
         await session.execute(query7)
         await session.commit()
+
         return {'success': True, 'message': 'Order successfully created'}
 
     except IntegrityError:
@@ -327,15 +332,18 @@ async def create_order(order_data: OrderSchema, token: dict = Depends(verify_tok
 
 
 @purchasing_system.get("/orders")
-async def get_order(token: dict = Depends(verify_token), session: AsyncSession = Depends(get_async_session)):
+async def get_order(
+        token: dict = Depends(verify_token), session: AsyncSession = Depends(get_async_session)
+):
+
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
 
+    products = []
     query = select(Order.id).where(Order.user_id == token.get('user_id'))
     result = await session.execute(query)
     order_ids = [order[0] for order in result.all()]
 
-    products = []
     count = 0
     for order_id in order_ids:
         count += 1
@@ -346,7 +354,6 @@ async def get_order(token: dict = Depends(verify_token), session: AsyncSession =
         query2 = select(Product).join(ProductOrder).where(ProductOrder.order_id == order_id)
         result2 = await session.execute(query2)
         products_info = result2.scalars().all()
-
         for info in results1:
             shipping_address_info = (await session.execute(
                 select(ShippingAddress.shipping_address).where(
@@ -376,8 +383,8 @@ async def get_order(token: dict = Depends(verify_token), session: AsyncSession =
 
             datas = ({'id': product.id,
                       "name": product.name,
-                      "price": product.price,
                       "description": product.description,
+                      "price": product.price,
                       "subcategory_name": subcategory_name,
                       "quantity": product.quantity,
                       "brand_name": brand_name,
@@ -387,7 +394,6 @@ async def get_order(token: dict = Depends(verify_token), session: AsyncSession =
                       })
             products.append({
                 f'{count}. product': datas})
-
     return products
 
 
@@ -450,4 +456,3 @@ async def add_address(
     data = await session.execute(query)
     print(data)
     return {'success': True, 'message': 'Address successfully saved'}
-
