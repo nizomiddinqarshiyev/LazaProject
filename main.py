@@ -11,26 +11,19 @@ from starlette.staticfiles import StaticFiles
 
 from auth.auth import register_router
 from market.market import purchasing_system
-<<<<<<< HEAD
 from payments.payment import payment_root
-=======
 
 from auth.utils import verify_token
 from database import get_async_session
 from market.scheme import ReviewCreate, ReviewGet, LikeScheme, WishlistScheme, WishlistGet
 from models.models import Review, Like, Wishlist, Subcategory, Brand, Category, Product, User
->>>>>>> 27efd12ad0cbaddc131a74914844f2d1a4932aab
 from product.product import product_root
 
 router = APIRouter()
 
 app = FastAPI(title='User', version='1.0.0')
-<<<<<<< HEAD
 app.include_router(payment_root,prefix='/payment')
 app.include_router(product_root,prefix='/product')
-=======
-app.include_router(product_root, prefix='/product')
->>>>>>> 27efd12ad0cbaddc131a74914844f2d1a4932aab
 app.include_router(register_router, prefix='/auth')
 app.include_router(purchasing_system, prefix='/purchasing')
 # app.mount('/media', StaticFiles(directory='media'), 'files')
