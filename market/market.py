@@ -160,57 +160,6 @@ async def purchasing_cart_delete(
         return {"message": "Shopping cart has been deleted successfully"}
 
 
-@purchasing_system.post('/shipping-address')
-async def post_shipping_address(
-        shipping_address_data: ShippingAddressSchemas, token: dict = Depends(verify_token),
-        session: AsyncSession = Depends(get_async_session)
-):
-
-    if token is None:
-        raise HTTPException(status_code=403, detail='Forbidden')
-
-    query1 = select(ShippingAddress).where(
-        (ShippingAddress.shipping_address == shipping_address_data.shipp_address)).where(
-        ShippingAddress.user_id == token.get('user_id'))
-    user_exists = await session.execute(query1)
-    exists = bool(user_exists.scalar())
-
-    if exists is not True:
-        query3 = insert(ShippingAddress).values(
-            user_id=token.get('user_id'),
-            shipping_address=shipping_address_data.shipp_address
-        )
-        await session.execute(query3)
-        await session.commit()
-
-    else:
-        raise HTTPException(status_code=400, detail='Shipping address already exists!')
-    return {'success': True, 'message': 'Successfully added shipping address!'}
-
-
-@purchasing_system.get('/shipping-address', response_model=ShippingAddressGetSchemas)
-async def get_user_shipping_addresses(
-        token: dict = Depends(verify_token),
-        session: AsyncSession = Depends(get_async_session)
-):
-    if token is None:
-        raise HTTPException(status_code=403, detail='Forbidden')
-    try:
-        query = select(ShippingAddress).where(ShippingAddress.user_id == token.get('user_id'))
-        user_shipping_data = await session.execute(query)
-        shipping_address = user_shipping_data.scalar_one_or_none()
-        if shipping_address:
-            return ShippingAddressGetSchemas(
-                id=shipping_address.id,
-                shipping_address=shipping_address.shipping_address,
-                user_id=shipping_address.user_id
-            )
-        else:
-            raise HTTPException(status_code=404, detail="Shipping address not found!")
-    except Exception as e:
-        raise HTTPException(status_code=404, detail="Not found")
-
-
 @purchasing_system.get('/user-cards', response_model=CardSchemas)
 async def get_user_cards(
         token: dict = Depends(verify_token),
@@ -389,6 +338,56 @@ async def get_order(
             product_details.append({
                 f'{counts}. product': datas})
     return product_details
+
+
+@purchasing_system.get('/shipping-address', response_model=ShippingAddressGetSchemas)
+async def get_user_shipping_addresses(
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
+):
+    if token is None:
+        raise HTTPException(status_code=403, detail='Forbidden')
+    try:
+        query = select(ShippingAddress).where(ShippingAddress.user_id == token.get('user_id'))
+        user_shipping_data = await session.execute(query)
+        shipping_address = user_shipping_data.scalar_one_or_none()
+        if shipping_address:
+            return ShippingAddressGetSchemas(
+                id=shipping_address.id,
+                shipping_address=shipping_address.shipping_address,
+                user_id=shipping_address.user_id
+            )
+        else:
+            raise HTTPException(status_code=404, detail="Shipping address not found!")
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Not found")
+
+
+@purchasing_system.post('/shipping-address')
+async def post_shipping_address(
+        shipping_address_data: ShippingAddressSchemas, token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
+):
+    if token is None:
+        raise HTTPException(status_code=403, detail='Forbidden')
+
+    query1 = select(ShippingAddress).where(
+        (ShippingAddress.shipping_address == shipping_address_data.shipp_address)).where(
+        ShippingAddress.user_id == token.get('user_id'))
+    user_exists = await session.execute(query1)
+    exists = bool(user_exists.scalar())
+
+    if exists is not True:
+        query3 = insert(ShippingAddress).values(
+            user_id=token.get('user_id'),
+            shipping_address=shipping_address_data.shipp_address
+        )
+        await session.execute(query3)
+        await session.commit()
+
+    else:
+        raise HTTPException(status_code=400, detail='Shipping address already exists!')
+    return {'success': True, 'message': 'Successfully added shipping address!'}
 
 
 @purchasing_system.get('/city/{id}')
