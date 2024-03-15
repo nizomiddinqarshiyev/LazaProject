@@ -6,7 +6,7 @@ from typing import Union
 from pydantic import BaseModel, Field
 
 
-class ShoppingCartScheme(BaseModel):
+class ShoppingCartSchemas(BaseModel):
     product: dict
     order_id: int
     count: int
@@ -16,50 +16,46 @@ class ShoppingCartScheme(BaseModel):
     total: float
 
 
-class ShoppingCountCartScheme(BaseModel):
-    product_id: int
+class ShoppingCountCartSchemas(BaseModel):
+    product_ids: int
     count: Optional[conint(gt=0)]
 
 
-class ShoppingSaveCartScheme(BaseModel):
-
-    product_id: int
-
-
-class ShippingAddressScheme(BaseModel):
-    shipping_address: str
+class ShoppingSaveCartSchemas(BaseModel):
+    product_ids: int
 
 
-class ShippingAddressGetScheme(BaseModel):
+class ShippingAddressSchemas(BaseModel):
+    shipp_address: str
 
+class ShippingAddressGetSchemas(BaseModel):
     id: int
-    shipping_address: str
-    user_id: int
+    shipp_address: str
+    user_ids: int
 
 
-class UserCardScheme(BaseModel):
-
-    card_number: str = Field(max_length=16, min_length=16)
+class UserCardSchemas(BaseModel):
+    card_numbers: str = Field(max_length=16, min_length=16)
     card_expiration: str = Field(max_length=4, min_length=4)
-    card_cvc: Optional[int] = None
+    cvc: Optional[int] = None
 
 
 class UserCardDelete(BaseModel):
     card: int
 
 
-class CardScheme(BaseModel):
+class CardSchemas(BaseModel):
     user_name: dict
     cards: List[dict]
 
 
-class OrderSchema(BaseModel):
+class OrderSchemas(BaseModel):
 
-    product_id: int
-    tracking_number: Optional[str]
+    product_ids: int
+    tracking_numbers: Optional[str]
     status: str
     payment_method: str
-    shipping_address_id: int
+    shipp_address_id: int
     delivery_method_id: int
     user_card_id: Optional[int]
 
