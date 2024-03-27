@@ -682,7 +682,7 @@ async def add_product_discount(
             return {"success": False, "message": "Product not found"}
 
 
-@product_root.get('/product/DiscountProduct', response_model=List[ProductDiscount])
+@product_root.get('/product/DiscountProduct', response_model=None)
 async def get_ProductDiscount(token: dict = Depends(verify_token),
                               session: AsyncSession = Depends(get_async_session)
                               ):

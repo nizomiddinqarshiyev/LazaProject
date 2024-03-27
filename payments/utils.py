@@ -40,7 +40,6 @@ def decode_card_number(card_number: str):
     return number
 
 
-
 def collect_to_list(card_data):
     cards_data = []
     for element in card_data:

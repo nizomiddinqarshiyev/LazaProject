@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, ForeignKey, Integer, String,
     Text, TIMESTAMP, DECIMAL, UniqueConstraint,
-    Enum, MetaData, Boolean, Float, Date
+    Enum, MetaData, Boolean, Float, Date, VARCHAR
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -178,6 +178,15 @@ class Order(Base):
     shipping_address_id = Column(Integer, ForeignKey('shipping_address.id'))
     delivery_method_id = Column(Integer, ForeignKey('delivery_method.id'))
     user_card_id = Column(Integer, ForeignKey('user_card.id'), nullable=True)
+
+
+class Invoice(Base):
+    __tablename__ = 'invoice'
+    metadata = metadata
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    amount = Column(Integer)
+    status = Column(VARCHAR(10), default='waiting')
+    order_id = Column(Integer, ForeignKey('order.id'))
 
 
 class ProductOrder(Base):
