@@ -11,7 +11,7 @@ from auth.utils import verify_token
 from market.scheme import ShoppingCartSchemas, ShoppingSaveCartSchemas, ShippingAddressSchemas, ShippingAddressGetSchemas, \
     UserCardSchemas, CardSchemas, OrderSchemas, ShoppingCountCartSchemas, \
     UserCardDelete, CityAddScheme, CountryScheme, AddressPOSTScheme
-from market.util import collect_to_list, step_3
+from market.util import collect_to_list, third_step
 from models.models import ShoppingCart, Product, ShippingAddress, UserCard, Order, ProductOrder, Brand, Category, \
     Subcategory, DeliveryMethod, Country, City, Address, User
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -242,7 +242,7 @@ async def add_card(
     if token is None:
         raise HTTPException(status_code=403, detail='Forbidden')
     try:
-        card_number = step_3(card_information.card_numbers)
+        card_number = third_step(card_information.card_numbers)
         query = select(UserCard).where(UserCard.card_number == card_number)
         card_data = await session.execute(query)
         card__data = card_data.one_or_none()
