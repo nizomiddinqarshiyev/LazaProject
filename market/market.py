@@ -11,7 +11,7 @@ from auth.utils import verify_token
 from market.scheme import ShoppingCartSchemas, ShoppingSaveCartSchemas, ShippingAddressSchemas, ShippingAddressGetSchemas, \
     UserCardSchemas, CardSchemas, OrderSchemas, ShoppingCountCartSchemas, \
     UserCardDelete, CityAddScheme, CountryScheme, AddressPOSTScheme
-from market.utils import collect_to_list, step_3
+from market.util import collect_to_list, step_3
 from models.models import ShoppingCart, Product, ShippingAddress, UserCard, Order, ProductOrder, Brand, Category, \
     Subcategory, DeliveryMethod, Country, City, Address, User
 from sqlalchemy.ext.asyncio import AsyncSession
